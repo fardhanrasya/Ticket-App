@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  YourName:
+    Type: String
+
+Resources:
+  MyDynamoDBTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub 'users-${YourName}-prod'
+      PrimaryKey:
+        Name: userId
+        Type: String
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  MyDynamoDBTableName:
+    Description: "DynamoDB Table Name"
+    Value: !Ref MyDynamoDBTable
+    Export:
+      Name: MyDynamoDBTableName

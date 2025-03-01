@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: A simple AWS SAM template for a serverless application
+
+Resources:
+  MyApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: Prod
+      Auth:
+        Authorizers: AWS_IAM
+      
+Outputs:
+  ApiUrl:
+    Description: "URL for the API"
+    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

@@ -1,0 +1,218 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: A simple AWS SAM template for a serverless application
+
+Parameters:
+  DocumentDBClusterEndpoint:
+    Type: String
+  JwtSecret:
+    Type: String
+  DynamoTable:
+    Type: String
+  QueueName:
+    Type: String
+  SecretName:
+    Type: String
+  SecretArn:
+    Type: String
+  SecurityGroup:
+    Type: String
+  SubnetIds:
+    Type: List<String>
+
+Resources:
+  MyLayer:
+    Type: "AWS::Serverless::LayerVersion"
+    Properties:
+      LayerName: TicketAppLayer
+      Description: TicketAppLayer
+      ContentUri: ../../dist/layers
+      CompatibleRuntimes:
+        - nodejs18.x
+
+  AuthFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref MyLayer
+      CodeUri: ../../dist/functions/auth
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+
+  PostAuthFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref MyLayer
+      CodeUri: ../../dist/functions/post-auth
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref DynamoTable
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+
+  TokenFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref MyLayer
+      CodeUri: ../../dist/functions/get-auth
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoTable
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+
+  GetConcertFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds: !Ref SubnetIds
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref MyLayer
+      CodeUri: ../../dist/functions/get-concert
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+
+  PostConcertFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds: !Ref SubnetIds
+      Handler: app.handler
+      Runtime: nodejs18.x
+      Layers:
+        - !Ref MyLayer
+      CodeUri: ../../dist/functions/post-concert
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+
+  DeleteConcertFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      CodeUri: ../../dist/functions/delete-concert
+      Layers:
+        - !Ref MyLayer
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref SecretArn
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+
+  # PutConcertFunction:
+  #   Type: "AWS::Serverless::Function"
+  #   Properties:
+  #     Handler: app.handler
+  #     Runtime: nodejs18.x
+  #     CodeUri: ../../dist/functions/put-
+  #     Layers:
+  #       - !Ref MyLayer
+  #     MemorySize: 128
+  #     Timeout: 100
+  #     Policies:
+  #       - AWSSecretsManagerGetSecretValuePolicy:
+  #           SecretName: !Ref SecretName
+
+  PostQueueFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      CodeUri: ../../dist/functions/post-queue
+      Layers:
+        - !Ref MyLayer
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !Ref QueueName
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable
+          QUEUE_URL: !Sub "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/${QueueName}"
+
+  GetQueueFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: app.handler
+      Runtime: nodejs18.x
+      CodeUri: ../../dist/functions/get-queue
+      Layers:
+        - !Ref MyLayer
+      MemorySize: 128
+      Timeout: 100
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !Ref QueueName
+      Environment:
+        Variables:
+          DOCUMENTDB_CERT: /opt/cert/global-bundle.pem
+          DOCUMENTDB_SECRET: !Ref SecretName
+          DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
+          JWT_SECRET: !Ref JwtSecret
+          DYNAMODB_TABLE: !Ref DynamoTable

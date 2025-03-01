@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: "CloudFormation template to create the serverless model for the Ticket App."
+
+Parameters:
+  YourName:
+    Type: String
+  JwtSecret:
+    Type: String
+
+Resources:
+  DynamoDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./DynamoDBStack.yaml
+      TimeoutInMinutes: 30
+      Parameters:
+        YourName: !Ref YourName
+
+  TicketAppFunction:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: DynamoDBStack
+    Properties:
+      TemplateURL: ./TicketAppFunction.yaml
+      TimeoutInMinutes: 30
+      Parameters:
+        JwtSecret: !Ref JwtSecret
+        DynamoTable: !ImportValue MyDynamoDBTableName
+        QueueName: !ImportValue TicketQueueName
+        SecretName: !Sub Starry-Credentials-${YourName}
+        SecretArn: !ImportValue SecretArn
+        SecurityGroup: !ImportValue SecurityGroupId
+        DocumentDBClusterEndpoint: !ImportValue DocumentDBEndpoint
+        SubnetIds:
+          !Join [
+            ",",
+            [!ImportValue PrivateSubnet1Id, !ImportValue PrivateSubnet2Id]
+          ]
+
+  

@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation template to create the infrastructure for the Ticket App."
+
+Parameters:
+  YourName:
+    Type: String
+  MasterUser:
+    Type: String
+  MasterPass:
+    Type: String
+  JwtSecretKey:
+    Type: String
+
+Resources:
+  SqsStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./SqsStack.yaml
+      TimeoutInMinutes: 30
+      Parameters:
+        YourName: !Ref YourName
+
+  NetworkSecStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./NetworkSecStack.yaml
+      TimeoutInMinutes: 30
+      Parameters:
+        YourName: !Ref YourName
+        MasterUser: !Ref MasterUser
+        MasterPass: !Ref MasterPass
+        JwtSecretKey: !Ref JwtSecretKey
+        
+  DocumentDBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./DocumentDBStack.yaml
+      TimeoutInMinutes: 30
+      Parameters:
+        SubnetIds: !Join [",", [!GetAtt "NetworkSecStack.Outputs.PrivateSubnet1Id", !GetAtt "NetworkSecStack.Outputs.PrivateSubnet2Id"]]
+        SecurityGroupDBId: !GetAtt NetworkSecStack.Outputs.SecurityGroupId
+        ClusterIdentifier: !Sub "docdb-${YourName}-prod"
+        InstanceIdentifier: !Sub "docdb-${YourName}-instance-prod"
+        SecretArn: !GetAtt NetworkSecStack.Outputs.SecretArn

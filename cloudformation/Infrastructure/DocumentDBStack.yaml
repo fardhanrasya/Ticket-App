@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for the cheapest Amazon DocumentDB in a private subnet using AWS Secrets Manager.
+
+Parameters:
+  SubnetIds:
+    Description: Private Subnet IDs
+    Type: List<String>
+  SecurityGroupDBId:
+    Description: Security Group ID for DocumentDB
+    Type: String
+  ClusterIdentifier:
+    Description: DocumentDB Cluster Identifier
+    Type: String
+    Default: docdb-cluster
+  InstanceIdentifier:
+    Description: DocumentDB Instance Identifier
+    Type: String
+    Default: docdb-instance
+  SecretArn:
+    Description: ARN of the Secret Manager storing DocumentDB credentials
+    Type: String
+
+Resources:
+  DocumentDBSubnetGroup:
+    Type: AWS::DocDB::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: "docdb-subnet-group"
+      DBSubnetGroupDescription: "Subnet group for DocumentDB"
+      SubnetIds: !Ref SubnetIds
+
+  DocumentDBCluster:
+    Type: AWS::DocDB::DBCluster
+    Properties:
+      DBClusterIdentifier: !Ref ClusterIdentifier
+      EngineVersion: '5.0.0'  # Choose the latest available version
+      MasterUsername: !Sub "{{resolve:secretsmanager:${SecretArn}:SecretString:MasterUsername}}"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${SecretArn}:SecretString:MasterUserPassword}}"
+      VpcSecurityGroupIds:
+        - !Ref SecurityGroupDBId
+      DBSubnetGroupName: !Ref DocumentDBSubnetGroup
+      StorageEncrypted: true
+      BackupRetentionPeriod: 1  # Set to 1 to minimize storage cost
+
+  DocumentDBInstance:
+    Type: AWS::DocDB::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Ref InstanceIdentifier
+      DBClusterIdentifier: !Ref DocumentDBCluster
+      DBInstanceClass: db.t3.medium  # Cheapest instance type available
+      AutoMinorVersionUpgrade: false
+
+Outputs:
+  DocumentDBEndpoint:
+    Description: The connection endpoint for DocumentDB
+    Value: !GetAtt DocumentDBCluster.Endpoint
+    Export:
+      Name: DocumentDBEndpoint

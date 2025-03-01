@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  YourName:
+    Type: String
+    
+Resources:
+  TicketQueue:
+    Type: AWS::SQS::Queue
+    Properties: 
+      QueueName: !Sub 'ticket-queue-${YourName}-prod.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      DeduplicationScope: messageGroup
+
+Outputs:
+  TicketQueueName:
+    Description: "Ticket Queue Name"
+    Value: !GetAtt TicketQueue.QueueName
+    Export:
+      Name: TicketQueueName
