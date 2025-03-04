@@ -60,7 +60,6 @@ Resources:
   VPCEndpointDynamoDB:
     Type: AWS::EC2::VPCEndpoint
     Properties:
-      PrivateDnsEnabled: true
       VpcId: !Ref MyVPC
       ServiceName: !Sub com.amazonaws.${AWS::Region}.dynamodb
       VpcEndpointType: Interface

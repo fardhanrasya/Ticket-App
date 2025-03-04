@@ -1,0 +1,83 @@
+name: Deploy to AWS using SAM
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Compile TypeScript
+        run: npm run build
+  
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHubActions
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Deploy Infrastructure
+        run: |
+          sam build --template cloudformation/Infrastructure/template.yaml
+          sam deploy --stack-name infrastructure-stack \
+            --s3-bucket ${{ secrets.S3_BUCKET }} \
+            --s3-prefix infrastructure \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides \
+              YourName=${{ secrets.YOUR_NAME }} \
+              MasterUser=${{ secrets.MASTER_USER }} \
+              MasterPass=${{ secrets.MASTER_PASS }} \
+              JwtSecretKey=${{ secrets.JWT_SECRET_KEY }}
+  
+  deploy-serverless:
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: GitHubActionsTicketApp
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Deploy Serverless
+        run: |
+          sam build --template cloudformation/Serverless/template.yaml
+          sam deploy --stack-name serverless-stack \
+            --s3-bucket ${{ secrets.S3_BUCKET }} \
+            --s3-prefix serverless \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides \
+              YourName=${{ secrets.YOUR_NAME }} \
+              JwtSecret=${{ secrets.JWT_SECRET }}
