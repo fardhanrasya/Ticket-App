@@ -35,11 +35,15 @@ jobs:
       - name: Compile TypeScript
         run: npm run build
 
+      - name: Copy cert folder to dist
+        run: cp -r cert dist/
+
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: dist
   
   deploy-infrastructure:
     runs-on: ubuntu-latest
