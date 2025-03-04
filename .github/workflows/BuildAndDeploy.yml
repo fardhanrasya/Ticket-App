@@ -38,9 +38,6 @@ jobs:
       - name: Debug Check if dist exists
         run: ls -R || true
 
-      - name: Debug Check Source Files
-        run: ls -R src || true
-
       - name: Debug File dist 
         run: ls -R dist || true
   
@@ -84,6 +81,12 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHubActions
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Debug Check if dist exists
+        run: ls -R || true
+
+      - name: Debug File dist 
+        run: ls -R dist || true
 
       - name: Deploy Serverless
         run: |
