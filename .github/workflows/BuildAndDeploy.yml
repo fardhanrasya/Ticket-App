@@ -39,11 +39,14 @@ jobs:
         run: cp -r cert dist/
 
 
+      - name: Create ZIP of dist folder
+        run: zip -r dist.zip dist
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: dist.zip
   
   deploy-infrastructure:
     runs-on: ubuntu-latest
