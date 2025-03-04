@@ -25,7 +25,7 @@ Resources:
       TimeoutInMinutes: 30
       Parameters:
         JwtSecret: !Ref JwtSecret
-        DynamoTable: !ImportValue MyDynamoDBTableName
+        DynamoTable: !GetAtt DynamoDBStack.Outputs.MyDynamoDBTableName
         QueueName: !ImportValue TicketQueueName
         SecretName: !Sub Starry-Credentials-${YourName}
         SecretArn: !ImportValue SecretArn
