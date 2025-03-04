@@ -40,6 +40,9 @@ jobs:
 
       - name: Debug Check Source Files
         run: ls -R src || true
+
+      - name: Debug File dist 
+        run: ls -R dist || true
   
   deploy-infrastructure:
     runs-on: ubuntu-latest
@@ -81,9 +84,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           role-session-name: GitHubActions
           aws-region: ${{ secrets.AWS_REGION }}
-      
-      - name: Debug File Structure
-        run: ls -R dist
 
       - name: Deploy Serverless
         run: |
