@@ -13,6 +13,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Checkout repository
         uses: actions/checkout@v4
       
@@ -68,7 +73,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          role-session-name: GitHubActionsTicketApp
+          role-session-name: GitHubActions
           aws-region: ${{ secrets.AWS_REGION }}
       
       - name: Deploy Serverless
