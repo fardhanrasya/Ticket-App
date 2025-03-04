@@ -35,11 +35,11 @@ jobs:
       - name: Compile TypeScript
         run: npm run build
 
-      - name: Debug Check if dist exists
-        run: ls -R || true
-
-      - name: Debug File dist 
-        run: ls -R dist || true
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist/
   
   deploy-infrastructure:
     runs-on: ubuntu-latest
@@ -82,11 +82,13 @@ jobs:
           role-session-name: GitHubActions
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+
       - name: Debug Check if dist exists
         run: ls -R || true
-
-      - name: Debug File dist 
-        run: ls -R dist || true
 
       - name: Deploy Serverless
         run: |
