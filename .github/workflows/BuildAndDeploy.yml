@@ -106,7 +106,7 @@ jobs:
           sam deploy --stack-name serverless-stack \
             --s3-bucket ${{ secrets.S3_BUCKET }} \
             --s3-prefix serverless \
-            --capabilities CAPABILITY_IAM \
+            --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND CAPABILITY_NAMED_IAM \
             --parameter-overrides \
               YourName=${{ secrets.YOUR_NAME }} \
               JwtSecret=${{ secrets.JWT_SECRET_KEY }}
