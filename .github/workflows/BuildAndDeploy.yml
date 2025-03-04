@@ -94,6 +94,9 @@ jobs:
         with:
           name: dist
 
+      - name: Unzip dist folder
+        run: unzip dist.zip && rm dist.zip
+
       - name: Debug Check if dist exists
         run: ls -R || true
 
