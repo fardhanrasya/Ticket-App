@@ -85,4 +85,4 @@ jobs:
             --capabilities CAPABILITY_IAM \
             --parameter-overrides \
               YourName=${{ secrets.YOUR_NAME }} \
-              JwtSecret=${{ secrets.JWT_SECRET }}
+              JwtSecret=${{ secrets.JWT_SECRET_KEY }}
