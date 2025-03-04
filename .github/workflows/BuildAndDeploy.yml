@@ -76,6 +76,9 @@ jobs:
           role-session-name: GitHubActions
           aws-region: ${{ secrets.AWS_REGION }}
       
+      - name: Debug File Structure
+        run: ls -R dist
+
       - name: Deploy Serverless
         run: |
           sam build --template cloudformation/Serverless/template.yaml
