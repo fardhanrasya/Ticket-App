@@ -19,7 +19,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const { id } = event.pathParameters || {};
 
     // Fetch concert(s)
-    const result = id
+const result = id
     ? isUUID(id)
         ? await collection.findOne({ _id: new UUID(id).toBinary() })
         : await collection.findOne({ _id: new ObjectId(id) })
