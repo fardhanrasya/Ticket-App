@@ -8,8 +8,6 @@ import {UUID} from "/opt/node_modules/bson";
 import { connectToDocumentDB } from '/opt/utils/db'; // From Lambda Layer
 //@ts-ignore
 import Respond from "/opt/utils/respond";
-//@ts-ignore
-import isUUID from "/opt/utils/isUUID";
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const client = await connectToDocumentDB();
@@ -20,9 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
     // Fetch concert(s)
 const result = id
-    ? isUUID(id)
-        ? await collection.findOne({ _id: new UUID(id).toBinary() })
-        : await collection.findOne({ _id: new ObjectId(id) })
+    ? await collection.findOne({ _id: new UUID(id).toBinary() })
     : await collection.find({}).toArray();
 
     await client.close();
