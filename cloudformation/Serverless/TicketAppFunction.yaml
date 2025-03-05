@@ -92,6 +92,7 @@ Resources:
 
   TokenFunction:
     Type: "AWS::Serverless::Function"
+    DependsOn: ApiGatewayApi
     Properties:
       Handler: app.handler
       Runtime: nodejs18.x
