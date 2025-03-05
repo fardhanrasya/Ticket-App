@@ -38,9 +38,14 @@ jobs:
       - name: Copy cert folder to dist
         run: cp -r cert dist/
 
+      - name: Copy nodemodules folder to dist
+        run: cp -r cert dist/
 
       - name: Create ZIP of dist folder
         run: zip -r dist.zip dist
+
+      - name: Debug Check if dist exists
+        run: ls -R dist || true
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -96,9 +101,6 @@ jobs:
 
       - name: Unzip dist folder
         run: unzip dist.zip && rm dist.zip
-
-      - name: Debug Check if dist exists
-        run: ls -R || true
 
       - name: Deploy Serverless
         run: |

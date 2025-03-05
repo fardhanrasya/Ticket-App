@@ -37,4 +37,11 @@ Resources:
             [!ImportValue PrivateSubnet1Id, !ImportValue PrivateSubnet2Id]
           ]
 
-  
+  # ApiGateway:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn: TicketAppFunction
+  #   Properties:
+  #     TemplateURL: ./ApiGateway.yaml
+  #     TimeoutInMinutes: 30
+  #     Parameters:
+  #       YourName: !Ref YourName
