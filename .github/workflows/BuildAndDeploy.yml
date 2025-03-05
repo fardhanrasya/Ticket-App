@@ -36,10 +36,10 @@ jobs:
         run: npm run build
 
       - name: Copy cert folder to dist
-        run: cp -r cert dist/
+        run: cp -r cert dist/layers/
 
       - name: Copy nodemodules folder to dist
-        run: cp -r cert dist/
+        run: cp -r node_modules dist/layers/
 
       - name: Create ZIP of dist folder
         run: zip -r dist.zip dist
