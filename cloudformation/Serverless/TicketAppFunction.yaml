@@ -194,6 +194,10 @@ Resources:
   DeleteConcertFunction:
     Type: "AWS::Serverless::Function"
     Properties:
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        SubnetIds: !Ref SubnetIds
       Handler: app.handler
       Runtime: nodejs18.x
       CodeUri: ../../dist/functions/delete-concert

@@ -97,7 +97,7 @@ jobs:
           name: dist
 
       - name: Unzip dist folder
-        run: unzip dist.zip && rm dist.zip
+        run: unzip -q dist.zip && rm dist.zip
 
       - name: Deploy Serverless
         run: |

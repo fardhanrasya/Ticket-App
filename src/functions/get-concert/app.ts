@@ -1,8 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 //@ts-ignore
-import {ObjectId} from "/opt/node_modules/mongodb";
-//@ts-ignore
 import {UUID} from "/opt/node_modules/bson";
 // @ts-ignore
 import { connectToDocumentDB } from '/opt/utils/db'; // From Lambda Layer
