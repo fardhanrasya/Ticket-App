@@ -9,8 +9,6 @@ import {ObjectId} from "/opt/node_modules/mongodb"
 import Respond from "/opt/utils/respond";
 //@ts-ignore
 import {connectToDocumentDB} from "/opt/utils/db";
-//@ts-ignore
-import isUUID from "/opt/utils/isUUID";
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try{
@@ -19,10 +17,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const concertsCollection = db.collection('concerts');
 
         const { id } = event.pathParameters || {};
-        if(id && isUUID(id)){
+        if(id){
             await concertsCollection.deleteOne({ _id: new UUID(id).toBinary() });
-        } else {
-            await concertsCollection.deleteOne({ _id: new ObjectId(id) });
         }
         return Respond.OK("Concert deleted");
     } catch (error){
