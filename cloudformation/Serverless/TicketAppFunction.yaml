@@ -85,6 +85,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /auth
             Method: post
             Auth:
@@ -115,6 +116,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /token
             Method: post
             Auth:
@@ -148,11 +150,13 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /concerts
             Method: get
         ApiEvent2:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /concerts/{id}
             Method: get
 
@@ -184,6 +188,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /concerts/{id}
             Method: post
 
@@ -212,6 +217,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /concerts/{id}
             Method: delete
 
@@ -254,6 +260,7 @@ Resources:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ApiGatewayApi
             Path: /queues
             Method: post
 
