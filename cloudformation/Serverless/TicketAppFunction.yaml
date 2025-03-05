@@ -23,7 +23,6 @@ Parameters:
 Resources:
   ApiGatewayApi:
     Type: AWS::Serverless::Api
-    DependsOn: AuthFunction
     Properties:
       StageName: Prod
       Auth:
@@ -93,7 +92,6 @@ Resources:
 
   TokenFunction:
     Type: "AWS::Serverless::Function"
-    DependsOn: ApiGatewayApi
     Properties:
       Handler: app.handler
       Runtime: nodejs18.x
