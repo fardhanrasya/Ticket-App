@@ -1,3 +1,4 @@
+
 import {APIGatewayProxyEvent, APIGatewayProxyResult} from "aws-lambda";
 
 //@ts-ignore
@@ -17,9 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const concertsCollection = db.collection('concerts');
 
         const { id } = event.pathParameters || {};
-        if(id){
-            await concertsCollection.deleteOne({ _id: new UUID(id).toBinary() });
-        }
+        await concertsCollection.deleteOne({ _id: new UUID(id).toBinary() });
         return Respond.OK("Concert deleted");
     } catch (error){
         console.error('Error:', error);
