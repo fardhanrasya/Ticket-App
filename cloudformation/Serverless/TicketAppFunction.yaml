@@ -21,6 +21,20 @@ Parameters:
     Type: List<String>
 
 Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    DependsOn: AuthFunction
+    Properties:
+      StageName: Prod
+      Auth:
+        Authorizers:
+          LambdaTokenAuth:
+            FunctionArn: !GetAtt AuthFunction.Arn
+        DefaultAuthorizer: LambdaTokenAuth
+      EndpointConfiguration:
+        Type: EDGE
+      Cors: "'*'"
+
   MyLayer:
     Type: "AWS::Serverless::LayerVersion"
     Properties:
@@ -67,6 +81,14 @@ Resources:
           DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /auth
+            Method: post
+            Auth:
+              Authorizer: AWS_IAM
 
   TokenFunction:
     Type: "AWS::Serverless::Function"
@@ -88,6 +110,14 @@ Resources:
           DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /token
+            Method: post
+            Auth:
+              Authorizer: NONE
 
   GetConcertFunction:
     Type: "AWS::Serverless::Function"
@@ -113,6 +143,17 @@ Resources:
           DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /concerts
+            Method: get
+        ApiEvent2:
+          Type: Api
+          Properties:
+            Path: /concerts/{id}
+            Method: get
 
   PostConcertFunction:
     Type: "AWS::Serverless::Function"
@@ -138,6 +179,13 @@ Resources:
           DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /concerts/{id}
+            Method: post
+
 
   DeleteConcertFunction:
     Type: "AWS::Serverless::Function"
@@ -159,6 +207,12 @@ Resources:
           DocumentDBClusterEndpoint: !Ref DocumentDBClusterEndpoint
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /concerts/{id}
+            Method: delete
 
   # PutConcertFunction:
   #   Type: "AWS::Serverless::Function"
@@ -195,6 +249,12 @@ Resources:
           JWT_SECRET: !Ref JwtSecret
           DYNAMODB_TABLE: !Ref DynamoTable
           QUEUE_URL: !Sub "https://sqs.${AWS::Region}.amazonaws.com/${AWS::AccountId}/${QueueName}"
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /queues
+            Method: post
 
   GetQueueFunction:
     Type: "AWS::Serverless::Function"
